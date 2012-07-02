@@ -17,8 +17,6 @@ using namespace ofxBonjour;
 
 @property (readwrite, retain) NSNetServiceBrowser *browser;
 @property (readwrite, retain) NSMutableArray *services;
-@property (readwrite, assign) BOOL isConnected;
-@property (readwrite, retain) NSNetService *connectedService;
 @property (readwrite) Client * clientRef;
 
 @end
@@ -27,13 +25,10 @@ using namespace ofxBonjour;
 
 @synthesize browser;
 @synthesize services;
-@synthesize isConnected;
-@synthesize connectedService;
 @synthesize clientRef;
 
 
 -(void)dealloc {
-    self.connectedService = nil;
     self.browser = nil;
     [services release];
     [super dealloc];
@@ -44,8 +39,6 @@ using namespace ofxBonjour;
     services = [NSMutableArray new];
     self.browser = [[NSNetServiceBrowser new] autorelease];
     self.browser.delegate = self;
-    self.isConnected = NO;
-    self.clientRef = NULL;
     
     self.clientRef = client;
 }
@@ -55,7 +48,9 @@ using namespace ofxBonjour;
     [self.browser searchForServicesOfType:type inDomain:domain];
 }
 
--(void)connect:(NSNetService*) remoteService {
+//---resolve the IP address of a service---
+-(void) resolveIPAddress:(NSNetService *)service {    
+    NSNetService *remoteService = service;
     remoteService.delegate = self;
     [remoteService resolveWithTimeout:0];
 }
@@ -63,6 +58,7 @@ using namespace ofxBonjour;
 #pragma mark Net Service Browser Delegate Methods
 -(void)netServiceBrowser:(NSNetServiceBrowser *)aBrowser didFindService:(NSNetService *)aService moreComing:(BOOL)more {
     [services addObject:aService];
+    [self resolveIPAddress:aService];
     
     if ( self.clientRef != NULL ){
         self.clientRef->_onServiceDiscovered(aService);
@@ -74,16 +70,32 @@ using namespace ofxBonjour;
 
 -(void)netServiceBrowser:(NSNetServiceBrowser *)aBrowser didRemoveService:(NSNetService *)aService moreComing:(BOOL)more {
     [services removeObject:aService];
-    if ( aService == self.connectedService ) self.isConnected = NO;
     if ( self.clientRef != NULL ){
         self.clientRef->_onServiceRemoved(aService);
     }
 }
 
 -(void)netServiceDidResolveAddress:(NSNetService *)service {
-    self.isConnected = YES;
-    self.connectedService = service;
-    NSLog(@"Totally connected to service at %@", service.hostName);
+    NSString *name = [service name];
+    NSData  *address = nil;
+    struct sockaddr_in *socketAddress = nil;
+    memset(&socketAddress, 0, sizeof(socketAddress));
+    
+    NSString *ipString = nil;
+    int port;
+    
+    for(int i=0;i < [[service addresses] count]; i++ ){
+        address = [[service addresses] objectAtIndex: i];
+        socketAddress = (struct sockaddr_in *) [address
+                                                bytes];
+        ipString = [NSString stringWithFormat: @"%s", inet_ntoa(socketAddress->sin_addr)];
+        port = socketAddress->sin_port;
+        //debug.text = [debug.text stringByAppendingFormat:@"Resolved:%@-->%@:%hu\n", [service hostName], ipString, port];
+        
+        if ( self.clientRef != NULL ){ 
+            self.clientRef->_onServiceData(service, [ipString cStringUsingEncoding:NSUTF8StringEncoding], port);
+        }
+    }
 }
 
 -(void)netService:(NSNetService *)service didNotResolve:(NSDictionary *)errorDict {
@@ -95,18 +107,20 @@ using namespace ofxBonjour;
 namespace ofxBonjour {
     
     
+    //--------------------------------------------------------------
     Client::Client(){
-        cout<<"wot"<<endl;
         controller = [[ClientController alloc] init];
         [controller setup:this];
         bDiscovering = false;
     }
     
+    //--------------------------------------------------------------
     Client::~Client(){
         [controller dealloc];
         bDiscovering = false;
     }
     
+    //--------------------------------------------------------------
     void Client::discover( string type, string domain ){
         if ( bDiscovering ){
             ofLog(OF_LOG_ERROR, "Still discovering, please wait");
@@ -116,8 +130,8 @@ namespace ofxBonjour {
         [controller search:toNSString(type) domain:toNSString(domain)];
     }
     
+    //--------------------------------------------------------------
     // called when finished discovering
-    
     void Client::_onServicesDiscovered(){
         bDiscovering = false;
         services.clear();
@@ -128,12 +142,14 @@ namespace ofxBonjour {
         ofNotifyEvent( Events().onServicesDiscovered, services, this);
     }
     
-    // called each time we get a service
     
+    //--------------------------------------------------------------
+    // called each time we get a service
     void Client::_onServiceDiscovered( NSNetService * service ){
-        ofNotifyEvent( Events().onServiceDiscovered, service, this); 
+        //ofNotifyEvent( Events().onServiceDiscovered, service, this); 
     }
     
+    //--------------------------------------------------------------
     void Client::_onServiceRemoved( NSNetService * service ){
         // this is stupid.
         services.clear();
@@ -142,6 +158,17 @@ namespace ofxBonjour {
             services.push_back(aService);
         }
         ofNotifyEvent( Events().onServiceRemoved, service, this);
+    }
+    
+    //--------------------------------------------------------------
+    // called when we have IP + port info for a service
+    void Client::_onServiceData( NSNetService * service, string ipAddress, int port ){
+        Service serviceStruct;
+        serviceStruct.ref       = service;
+        serviceStruct.ipAddress = ipAddress;
+        serviceStruct.port      = port;
+        
+        ofNotifyEvent( Events().onServiceDiscovered, serviceStruct, this); 
     }
     
 }

@@ -135,14 +135,14 @@
 		A9E36F7215A1431E00647AFD /* src */ = {
 			isa = PBXGroup;
 			children = (
-				A9E36F7F15A1433B00647AFD /* ofxBonjour.h */,
-				A9E36F8915A143D200647AFD /* Server.h */,
-				A9E36F8A15A1445500647AFD /* Server.mm */,
-				A9B4F17B15A14A1B00F55CEF /* Utils.h */,
 				A9B4F18515A1552400F55CEF /* Client.h */,
 				A9B4F18615A1555100F55CEF /* Client.mm */,
 				A9B4F18815A15D7600F55CEF /* Events.h */,
 				A9B4F18915A15DF200F55CEF /* Events.mm */,
+				A9E36F7F15A1433B00647AFD /* ofxBonjour.h */,
+				A9E36F8915A143D200647AFD /* Server.h */,
+				A9E36F8A15A1445500647AFD /* Server.mm */,
+				A9B4F17B15A14A1B00F55CEF /* Utils.h */,
 			);
 			path = src;
 			sourceTree = "<group>";

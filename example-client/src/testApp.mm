@@ -3,6 +3,7 @@
 //--------------------------------------------------------------
 void testApp::setup(){
     ofAddListener(ofxBonjour::Events().onServicesDiscovered, this, &testApp::discoveredServices);
+    ofAddListener(ofxBonjour::Events().onServiceDiscovered, this, &testApp::gotServiceData );
     bonjourClient.discover("_ecs._tcp.");
 }
 
@@ -42,6 +43,11 @@ void testApp::discoveredServices( vector<NSNetService*> & services ){
     for (int i=0; i<services.size(); i++){
         cout<< [services[i].description cStringUsingEncoding:NSUTF8StringEncoding] << endl;
     }
+}
+
+//--------------------------------------------------------------
+void testApp::gotServiceData( Service & service ){
+    cout<< service.ipAddress << ":" << service.port << endl;
 }
 
 //--------------------------------------------------------------

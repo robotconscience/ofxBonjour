@@ -9,12 +9,14 @@
 #pragma once
 
 #include "ofEvents.h"
-#include <Cocoa/Cocoa.h>
+#include "Utils.h"
+
+#import <Cocoa/Cocoa.h>
 
 namespace ofxBonjour {
     class ofxBonjourEvents {
     public:
-        ofEvent<NSNetService*> onServiceDiscovered;
+        ofEvent<Service> onServiceDiscovered;
         ofEvent<NSNetService*> onServiceRemoved;
         ofEvent<vector<NSNetService*> > onServicesDiscovered;
     };

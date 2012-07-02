@@ -23,6 +23,7 @@ class testApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
     
         void discoveredServices( vector<NSNetService*> & services );
+        void gotServiceData( Service & service );
     
         Client bonjourClient;
 };

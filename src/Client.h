@@ -9,6 +9,8 @@
 #pragma once
 
 #import <Cocoa/Cocoa.h>
+#import <netinet/in.h>
+#import <arpa/inet.h>
 #include "Utils.h"
 
 namespace ofxBonjour{
@@ -18,19 +20,17 @@ namespace ofxBonjour{
 using namespace ofxBonjour;
 
 @interface ClientController : NSObject {
-    BOOL isConnected;
     NSNetServiceBrowser *browser;
-    NSNetService *connectedService;
     NSMutableArray *services;
     Client * clientRef;
 }
 
 @property (readonly, retain) NSMutableArray *services;
-@property (readonly, assign) BOOL isConnected;
 
 -(void)setup:(Client*) client;
 -(void)search:(NSString *)type domain:(NSString *)domain;
 -(void)connect:(NSNetService*) remoteService;
+-(void) resolveIPAddress:(NSNetService *)service;
 
 @end
 
@@ -48,6 +48,8 @@ namespace ofxBonjour {
         void _onServicesDiscovered();
         void _onServiceDiscovered( NSNetService * service );
         void _onServiceRemoved( NSNetService * service );
+        
+        void _onServiceData(NSNetService * service, string ipAddress, int port);
         
         vector <NSNetService *> getServices(){
             return services;
