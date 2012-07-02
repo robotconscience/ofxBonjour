@@ -23,5 +23,6 @@ namespace ofxBonjour {
         NSNetService *      ref;
         std::string         ipAddress;
         int                 port;
+        std::string         name;
     };
 }

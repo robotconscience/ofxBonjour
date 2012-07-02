@@ -55,9 +55,14 @@ namespace ofxBonjour {
             return services;
         }
         
+        vector <Service> getResolvedServices(){
+            return resolvedServices;
+        }
+        
     protected:
         ClientController * controller;
         bool bDiscovering;
         vector <NSNetService *> services;
+        vector <Service>       resolvedServices;
     };
 }

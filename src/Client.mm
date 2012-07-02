@@ -157,6 +157,13 @@ namespace ofxBonjour {
         for (NSNetService * aService in controller.services ){
             services.push_back(aService);
         }
+        
+        for ( int i=0; i<resolvedServices.size(); i++){
+            if ( resolvedServices[i].ref == service ){
+                resolvedServices.erase( resolvedServices.begin() + i );
+            }
+        }
+        
         ofNotifyEvent( Events().onServiceRemoved, service, this);
     }
     
@@ -167,6 +174,9 @@ namespace ofxBonjour {
         serviceStruct.ref       = service;
         serviceStruct.ipAddress = ipAddress;
         serviceStruct.port      = port;
+        serviceStruct.name      = [service.name cStringUsingEncoding:NSUTF8StringEncoding];
+        
+        resolvedServices.push_back( serviceStruct );
         
         ofNotifyEvent( Events().onServiceDiscovered, serviceStruct, this); 
     }
