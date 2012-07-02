@@ -1,0 +1,31 @@
+#sublime user preferences
+*.sublime-workspace
+*.sublime-project
+
+#vim swap files
+*.swp
+
+*.mode*
+build/
+obj/
+*.o
+openFrameworks.a
+openFrameworksDebug.a
+openFrameworksUniversal.a
+*.app/
+*.class
+*.build/
+*dSYM/
+
+.DS_Store
+*.DS_Store
+*/*/*/*/.DS_Store
+
+addons/**
+
+#xcode files
+*.pbxuser
+*.perspectivev3
+*.xcuserdata
+xcuserdata/
+DerivedData/
