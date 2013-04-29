@@ -7,7 +7,15 @@
 //
 
 #pragma once
+#if defined( __APPLE_CC__)
+#include <TargetConditionals.h>
+
+#if (TARGET_OS_IPHONE_SIMULATOR) || (TARGET_OS_IPHONE) || (TARGET_IPHONE)
+#else
+
 #import <Cocoa/Cocoa.h>
+#endif
+#endif
 
 @interface ServerController : NSObject  {
     NSNetService *netService;
